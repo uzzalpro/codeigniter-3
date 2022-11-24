@@ -14,7 +14,7 @@
         <?php endif; ?>
             <?php echo form_open_multipart('admin/updateUser','',''); ?>
             <input type="hidden" name="oid" value="<?php echo $_SESSION['aId'] ?>">
-            <input type="hidden" name="oldimg" value="<?php echo $_SESSION['aPhoto'] ?>">
+            <input type="hidden" name="oldimgs" value="<?php echo $_SESSION['aPhoto'] ?>">
 
                 <p>First Name</p>
                 <div class="form-group">
@@ -40,7 +40,7 @@
             <?php echo form_close();?>  
         </div>
         <div class="col-md-3">
-        <img src="<?php echo base_url('assets/Users/'.$_SESSION['aPhoto'])?>" class="img-responsive">
+        <img src="<?php echo base_url('assets/profile/'.$_SESSION['aPhoto'])?>" class="img-responsive">
         </div>
     </div>
 </div>

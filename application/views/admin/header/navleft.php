@@ -67,6 +67,12 @@
             </a>
           </li>
           <li class="nav-item">
+            <a href="<?php echo site_url('admin/changePassword')?>" class="nav-link">
+            <i class="fa-solid fa-key"></i>
+              <p>Change Password</p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a href="<?php echo site_url('admin/editUserProfile/'.$_SESSION['aId'])?>" class="nav-link">
             <i class="fa fa-gear"></i>
               <p>Profile</p>

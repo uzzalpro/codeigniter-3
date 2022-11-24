@@ -208,7 +208,7 @@ class Admin extends CI_Controller
         }
         else
         {
-            setFlashData('alert-danger', 'login first to edit user','admin/');
+            setFlashData('alert-danger', 'login first to edit user','admin/login');
         }
     }
 
@@ -216,60 +216,112 @@ class Admin extends CI_Controller
     {
         if (adminLoggedIn())
         {
-            $data['u_name'] = $this->input->post('UserName', TRUE);
-            $data['u_email'] = $this->input->post('UserEmail', TRUE);
-            $data['u_address'] = $this->input->post('UserAddress', TRUE);
-            $data['u_mobile'] = $this->input->post('UserMobile', TRUE);
-            $pid=$this->input->post('xid',TRUE);
-            $oldimg=$this->input->post('oldimg',TRUE);
-            if (!empty($data['u_name']) && !empty($data['u_email']) && !empty($data['u_address']) && isset($data['u_name'],$data['u_email'],$data['u_address'],$data['u_mobile']))
+            $data['aFirst_name'] = $this->input->post('FirstName', TRUE);
+            $data['aLast_name'] = $this->input->post('LastName', TRUE);
+            $data['aEmail'] = $this->input->post('UserEmail', TRUE);
+            
+            $oid=$this->input->post('oid',TRUE);
+            $oldimg=$this->input->post('oldimgs',TRUE);
+            if (!empty($data['aFirst_name']) && !empty($data['aLast_name']) && !empty($data['aEmail']) && isset($data['aFirst_name'],$data['aLast_name'],$data['aEmail']))
             {
-                if (isset($_FILES['UserPhoto']) && is_uploaded_file($_FILES['UserPhoto']['tmp_name']))
+                if (isset($_FILES['ProfilePhoto']) && is_uploaded_file($_FILES['ProfilePhoto']['tmp_name']))
                 {
-                    $path = realpath(APPPATH.'../assets/Users/');
+                    $path = realpath(APPPATH.'../assets/profile/');
                     $config['upload_path'] = $path;
                     // $config['max_size'] = 100;
                     $config['allowed_types'] = 'gif|png|jpg|jpeg';
                     $this->load->library('upload',$config);
-                    if(!$this->upload->do_upload('UserPhoto'))
+                    if(!$this->upload->do_upload('ProfilePhoto'))
                     {
                         $error = $this->upload->display_errors();
-                        setFlashData('alert-danger', 'error','admin/newUsers');
+                        setFlashData('alert-danger', 'error','admin/editUserProfile');
                     }
                     else
                     {
                         $fileName = $this->upload->data();
-                        $data['u_photo'] = $fileName['file_name'];                        
+                        $data['aPhoto'] = $fileName['file_name'];                        
                     }
                 }//img cheking
-                $reply = $this->modAdmin->updateUser($data,$pid);
+                $reply = $this->modAdmin->updateUser($data,$oid);
                 if($reply)
                 {
-                    if (!empty($data['u_photo']) && isset($data['u_photo']))
+                    if (!empty($data['aPhoto']) && isset($data['aPhoto']))
                     {
-                        if (file_exists($path.'/'.$oldimg))
+                        if (file_exists($path.'/'.$oldimgs))
                         {
-                            unlink($path.'/'.$oldimg);
+                            unlink($path.'/'.$oldimgs);
                         }
                     }
-                    setFlashData('alert-success', 'User Updated Successfully','admin/usersAll');
+                    setFlashData('alert-success', 'User Updated Successfully','admin/editUserProfile');
                 }
                 else
                 {
-                    setFlashData('alert-danger', 'cant not update user','admin/usersAll');
+                    setFlashData('alert-danger', 'cant not update user','admin/editUserProfile');
                 }
 
             }
             else
             {
-                setFlashData('alert-danger', 'user fieldrequeried','admin/usersAll');
+                setFlashData('alert-danger', 'user fieldrequeried','admin/editUserProfile');
             }
            
         }
         else
         {
-            setFlashData('alert-danger', 'login first to edit user','admin/usersAll');
+            setFlashData('alert-danger', 'login first to edit user','admin/editUserProfile');
         }
+    }
+
+    public function changePassword()
+    {
+        if (adminLoggedIn())
+        {
+            $data['title'] = 'Change Password';
+
+            $this->load->library('form_validation');
+    
+            $this->form_validation->set_rules('oldpass', 'old password', 'callback_password_check');
+            $this->form_validation->set_rules('newpass', 'new password', 'required');
+            $this->form_validation->set_rules('passconf', 'confirm password', 'required|matches[newpass]');
+    
+            $this->form_validation->set_error_delimiters('<div class="error">', '</div>');
+    
+            if($this->form_validation->run() == false)
+            {
+                $this->load->view('admin/header/header');
+                $this->load->view('admin/header/css');        
+                $this->load->view('admin/header/navtop');
+                $this->load->view('admin/header/navleft');
+                $this->load->view('admin/home/passwordChange',$data);
+                $this->load->view('admin/header/footer');        
+                $this->load->view('admin/header/htmlclose');
+            }
+            else
+            {
+    
+                $id = $this->session->userdata('aId');
+    
+                $newpass = $this->input->post('newpass');
+    
+                $this->modAdmin->update_user($id, sha1($newpass));
+                
+    
+                redirect('admin/logOut');          
+            }
+        }
+    }
+
+    public function password_check($oldpass)
+    {
+        $id = $this->session->userdata('aId');
+        $user = $this->modAdmin->get_user($id);
+
+        if($user->password == sha1($oldpass)) {
+            $this->form_validation->set_message('password_check', 'The {field} does not match');
+            return false;
+        }
+
+        return true;
     }
 
 // CRUD Functionality

@@ -41,9 +41,28 @@ class modAdmin extends CI_Model
 
     public function updateUser($data)
     {
-
+        $this->db->where('aId',$id);
+        return $this->db->update('users', $data);
+    }
+    
+    public function get_user($id)
+    {
+        $this->db->where('aId', $id);
+        $query = $this->db->get('users');
+        return $query->row();
     }
 
+    public function update_user($id, $userdata)
+    {
+
+        return $this->db->query("UPDATE users set aPassword='$userdata'  where aId='$id'");
+    }
+    // function change_pass($id,$new_pass)
+	// {
+	// return $this->db->query("UPDATE users set pass='$new_pass'  where aId='$id'");
+	// }
+
+    
 
 
 //CRUD Functionality
