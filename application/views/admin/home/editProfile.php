@@ -1,4 +1,27 @@
 
+<?php
+
+$userId = '';
+$firstname = '';
+$lastname = '';
+$email = '';
+$photo = '';
+
+
+if(!empty($userInfo))
+{
+    foreach ($userInfo as $uf)
+    {
+        $userId = $uf->aId;
+        $firstname = $uf->firstname;
+        $lastname = $uf->lastname;
+        $email = $uf->email;        
+        $photo = $uf->photo;
+
+    }
+}
+?>
+
 
         
 <div class="content-wrapper ">
@@ -12,36 +35,36 @@
           <?php echo($this->session->flashdata('message'));?>
           </div>
         <?php endif; ?>
-            <?php echo form_open_multipart('admin/updateUser','',''); ?>
-            <input type="hidden" name="oid" value="<?php echo $_SESSION['aId'] ?>">
-            <input type="hidden" name="oldimgs" value="<?php echo $_SESSION['aPhoto'] ?>">
-
-                <p>First Name</p>
-                <div class="form-group">
-                    <?php echo form_input('FirstName',$_SESSION['aFirst_name'],'class="form-control"') ?>
+                <form class="col s12" role="form" action="<?php echo base_url() ?>admin/updateUser" method="post" id="editUseri" role="form">
+                <div class="row">
+                    <div class="input-field col s12">
+                    <input id="firstname" type="text" class="validate" name="firstname" value="<?php echo $this->session->userdata('aFirst_name')?>">
+                    <input type="hidden" value="<?php echo $userId; ?>" name="userId" id="userId" />
+                    <label for="name">First Name</label>
+                    </div>
                 </div>
-                <p>Last Name</p>
-                <div class="form-group">
-                    <?php echo form_input('LastName',$_SESSION['aLast_name'],'class="form-control"') ?>
+                <div class="row">
+                    <div class="input-field col s12">
+                    <input id="lastname" type="text" class="validate"  name="lastname" value="<?php echo $this->session->userdata('aLast_name')?>">
+                    <label for="lastname">Last Name</label>
+                    </div>
                 </div>
-                <p>Email</p>
-                <div class="form-group">
-                    <?php echo form_input('UserEmail',$_SESSION['aEmail'],'class="form-control"') ?>
+                <div class="row">
+                    <div class="input-field">
+                    <input id="email" type="text" class="validate" name="email" value="<?php echo $this->session->userdata('aEmail')?>">
+                    <label for="email">Email</label>
+                    </div>
                 </div>
-                <p>Photo</p>
-                <div class="form-group">
-                    <?php echo form_upload('ProfilePhoto',$_SESSION['aPhoto'],'class="form-control"') ?>
+                <div class="row">
+                    <div class="input-field col s12">
+                    <img src="<?php echo base_url('assets/profile/'.$this->session->userdata('aPhoto'))?>" class="img-responsive">
+                    <label for="ProfilePhoto">Photo</label>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <?php echo form_submit('updateUser','Update User','class="btn btn-primary"') ?>
-                </div>
-                
-            <?php echo form_close();?>  
-        </div>
-        <div class="col-md-3">
-        <img src="<?php echo base_url('assets/profile/'.$_SESSION['aPhoto'])?>" class="img-responsive">
-        </div>
+            <div class="box-footer">
+                    <input type="submit" class="btn btn-primary" value="Submit" />
+                    <input type="reset" class="btn btn-default" value="Reset" />
+            </div>
+            </form>        
     </div>
 </div>
-//$user[0]['u_address']

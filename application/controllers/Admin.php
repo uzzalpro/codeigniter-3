@@ -208,7 +208,7 @@ class Admin extends CI_Controller
         }
         else
         {
-            setFlashData('alert-danger', 'login first to edit user','admin/login');
+            setFlashData('alert-danger', 'login first to edit user','admin/');
         }
     }
 
@@ -216,54 +216,82 @@ class Admin extends CI_Controller
     {
         if (adminLoggedIn())
         {
-            $data['aFirst_name'] = $this->input->post('FirstName', TRUE);
-            $data['aLast_name'] = $this->input->post('LastName', TRUE);
-            $data['aEmail'] = $this->input->post('UserEmail', TRUE);
-            
-            $oid=$this->input->post('oid',TRUE);
-            $oldimg=$this->input->post('oldimgs',TRUE);
-            if (!empty($data['aFirst_name']) && !empty($data['aLast_name']) && !empty($data['aEmail']) && isset($data['aFirst_name'],$data['aLast_name'],$data['aEmail']))
-            {
-                if (isset($_FILES['ProfilePhoto']) && is_uploaded_file($_FILES['ProfilePhoto']['tmp_name']))
-                {
-                    $path = realpath(APPPATH.'../assets/profile/');
-                    $config['upload_path'] = $path;
-                    // $config['max_size'] = 100;
-                    $config['allowed_types'] = 'gif|png|jpg|jpeg';
-                    $this->load->library('upload',$config);
-                    if(!$this->upload->do_upload('ProfilePhoto'))
-                    {
-                        $error = $this->upload->display_errors();
-                        setFlashData('alert-danger', 'error','admin/editUserProfile');
-                    }
-                    else
-                    {
-                        $fileName = $this->upload->data();
-                        $data['aPhoto'] = $fileName['file_name'];                        
-                    }
-                }//img cheking
-                $reply = $this->modAdmin->updateUser($data,$oid);
-                if($reply)
-                {
-                    if (!empty($data['aPhoto']) && isset($data['aPhoto']))
-                    {
-                        if (file_exists($path.'/'.$oldimgs))
-                        {
-                            unlink($path.'/'.$oldimgs);
-                        }
-                    }
-                    setFlashData('alert-success', 'User Updated Successfully','admin/editUserProfile');
-                }
-                else
-                {
-                    setFlashData('alert-danger', 'cant not update user','admin/editUserProfile');
-                }
+            $this->load->library('form_validation');
 
+            $userId = $this->session->userdata('aId');
+
+            $this->form_validation->set_rules('aFirst_name','First Name','trim|required|max_length[200]|xss_clean');
+            $this->form_validation->set_rules('aLast_name','Last Name','trim|required|max_length[200]|xss_clean');
+            $this->form_validation->set_rules('aEmail','Email','trim|required|valid_email|xss_clean|max_length[200]');
+            $this->form_validation->set_rules('aPhoto','Photo','trim|required|valid_email|xss_clean|max_length[]');
+
+
+            if($this->form_validation->run() == FALSE)
+            {
+                $this->editUserProfile($userId);
             }
             else
             {
-                setFlashData('alert-danger', 'user fieldrequeried','admin/editUserProfile');
+                $first_name = $this->input->post('aFirst_name');
+                $first_name = $this->input->post('aLast_name');
+                $email = $this->input->post('aEmail');
+                $oldimg=$this->input->post('oldimgs',TRUE);
+                if (!empty($data['aFirst_name']) && !empty($data['aLast_name']) && !empty($data['aEmail']) && isset($data['aFirst_name'],$data['aLast_name'],$data['aEmail']))
+                {
+                    if (isset($_FILES['ProfilePhoto']) && is_uploaded_file($_FILES['ProfilePhoto']['tmp_name']))
+                    {
+                        $path = realpath(APPPATH.'../assets/profile/');
+                        $config['upload_path'] = $path;
+                        // $config['max_size'] = 100;
+                        $config['allowed_types'] = 'gif|png|jpg|jpeg';
+                        $this->load->library('upload',$config);
+                        if(!$this->upload->do_upload('ProfilePhoto'))
+                        {
+                            $error = $this->upload->display_errors();
+                            setFlashData('alert-danger', 'error','admin/editUserProfile');
+                        }
+                        else
+                        {
+                            $fileName = $this->upload->data();
+                            $data['aPhoto'] = $fileName['file_name'];                        
+                        }
+                    }//img cheking
+                    
+                $userInfo = array();
+
+                if(empty($password))
+                {
+                    $userInfo = array('aEmail'=>$email, 'aFirst_name'=>$firstname, 'aLast_name'=>$lastname,'aPhoto'=>$photo);
+                }
+                else
+                {
+                    $userInfo = array('aEmail'=>$email, 'aFirst_name'=>$firstname, 'aLast_name'=>$lastname,'aPhoto'=>$photo);
+                }
+                    $reply = $this->modAdmin->updateUser($userInfo,$userId);
+                    if($reply)
+                    {
+                        if (!empty($data['aPhoto']) && isset($data['aPhoto']))
+                        {
+                            if (file_exists($path.'/'.$oldimgs))
+                            {
+                                unlink($path.'/'.$oldimgs);
+                            }
+                        }
+                        setFlashData('alert-success', 'User Updated Successfully','admin/editUserProfile');
+                    }
+                    else
+                    {
+                        setFlashData('alert-danger', 'cant not update user','admin/editUserProfile');
+                    }
+
+                }
+                else
+                {
+                    setFlashData('alert-danger', 'user fieldrequeried','admin/editUserProfile');
+                }
+                
             }
+            
            
         }
         else
